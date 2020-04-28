@@ -70,6 +70,24 @@ RMSE4 = sqrt(SSE4/ nrow(NBA))
 RMSE4
 mean(NBA$PTS)
 
+#Predicting points for 2012 - 2013 season with new Test data filr
+
+
+
+
+NBA_Test = read.csv(file.choose())
+ 
+#Points in 2012-2013 season
+PointsPredicitions = predict(PointsReg4, newdata = NBA_Test)
+PointsPredicitions
+summary(PointsPredicitions)
+SSE = sum((PointsPredicitions - NBA_Test$PTS)^2)
+SST = sum((mean(NBA$PTS) - NBA_Test$PTS)^2)
+R2 = 1- SSE/SST
+
+RMSE = sqrt(SSE/nrow(NBA_Test))
+RMSE
+
 
 
 
