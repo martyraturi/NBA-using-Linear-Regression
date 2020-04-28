@@ -1,0 +1,79 @@
+#National Basketball Association (NBA)
+NBA <- read.csv(file.choose())
+str(NBA)
+
+#how many games does a team need 
+#to win in order to make the playoffs?
+
+table(NBA$W, NBA$Playoffs)
+# W = wins
+ 
+#Can we use the difference between points scored
+#and points allowed throughout the regular season in order
+#to predict the number of games that a team will win?
+
+
+NBA$PTSdiff = NBA$PTS - NBA$oppPTS
+str(NBA)
+plot(NBA$PTSdiff, NBA$W)
+WinsReg = lm(W~PTSdiff, data = NBA)
+summary(WinsReg)
+
+# W = 41 + 0.0326 * PTSdiff  >- 42
+# PTSdiff >- 42-41/0.0326 
+# PTSdiff = 30.67
+#we see that this is equal to 30.67.
+#So we need to score at least 31 more points
+#than we allow in order to win at least 42 games.
+
+
+#equation to predict points scored
+
+PointsReg = lm(PTS ~ X2PA + X3PA + FTA + AST + ORB + DRB +TOV +
+                 STL + BLK, data = NBA)
+summary(PointsReg)
+PointsReg$residuals
+
+#SSE, standing for sum of squared errors,
+SSE = sum(PointsReg$residuals^2)
+SSE
+#root mean squared error, RMSE-- 
+RMSE = sqrt(SSE/ nrow(NBA))
+RMSE
+mean(NBA$PTS)
+
+#Removing insignificant variables 
+#Removing Turn overs
+PointsReg2 = lm(PTS ~ X2PA + X3PA + FTA + AST + ORB + DRB +
+                 STL + BLK, data = NBA)
+summary(PointsReg2)
+
+#Removing insignificant variables
+#Removing DRB - defensive rebound 
+
+PointsReg3 = lm(PTS ~ X2PA + X3PA + FTA + AST + ORB + 
+                  STL + BLK, data = NBA)
+summary(PointsReg3)
+
+#Removing insignificant variables
+#Removing DRB - Blocks 
+
+PointsReg4 = lm(PTS ~ X2PA + X3PA + FTA + AST + ORB + 
+                  STL, data = NBA)
+summary(PointsReg4)
+
+#SSE, standing for sum of squared errors,
+SSE4 = sum(PointsReg4$residuals^2)
+SSE4
+#root mean squared error, RMSE-- 
+RMSE4 = sqrt(SSE4/ nrow(NBA))
+RMSE4
+mean(NBA$PTS)
+
+
+
+
+
+
+
+
