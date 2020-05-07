@@ -1,97 +1,90 @@
-#National Basketball Association (NBA)
-NBA <- read.csv(file.choose())
-str(NBA)
+#***********NBA*************
+NBA = read.csv(file.choose())
+str(NBA)  #structure of NDA Data 
 
-#how many games does a team need 
-#to win in order to make the playoffs?
+# how many games does a team need to win in order to make the playoffs?
+table(NBA$W, NBA$Playoffs) .. # team needs to win atleast 42 games
+#We get Number of Wins in row and O if team didn't make to play off and 1 if made to playoff in column
 
-table(NBA$W, NBA$Playoffs)
-# W = wins
- 
-#Can we use the difference between points scored
-#and points allowed throughout the regular season in order
 #to predict the number of games that a team will win?
-
+#First we add a variable that is the difference between points
 
 NBA$PTSdiff = NBA$PTS - NBA$oppPTS
-str(NBA)
-plot(NBA$PTSdiff, NBA$W)
-WinsReg = lm(W~PTSdiff, data = NBA)
+
+
+#Let's first make a scatter plot to see
+#if it looks like there's a linear relationship between the number of wins that a team wins
+#and the point difference.
+
+
+plot(NBA$PTSdiff , NBA$W)
+
+#o our graph pops up and it looks like there's an incredibly strong linear relationship between these two variables.
+#So it seems like linear regression is going to be a good way to predict how many wins
+#Let's try to verify this.So we're going to have PTSdiff as our independent variable in our regression,
+#and W for wins as the dependent variable
+
+
+WinsReg = lm(W ~ PTSdiff, data = NBA)
 summary(WinsReg)
-
-# W = 41 + 0.0326 * PTSdiff  >- 42
-# PTSdiff >- 42-41/0.0326 
-# PTSdiff = 30.67
-#we see that this is equal to 30.67.
-#So we need to score at least 31 more points
-#than we allow in order to win at least 42 games.
-
-
-#equation to predict points scored
-
-PointsReg = lm(PTS ~ X2PA + X3PA + FTA + AST + ORB + DRB +TOV +
-                 STL + BLK, data = NBA)
-summary(PointsReg)
-PointsReg$residuals
-
-#SSE, standing for sum of squared errors,
-SSE = sum(PointsReg$residuals^2)
-SSE
-#root mean squared error, RMSE-- 
-RMSE = sqrt(SSE/ nrow(NBA))
-RMSE
-mean(NBA$PTS)
-
-#Removing insignificant variables 
-#Removing Turn overs
-PointsReg2 = lm(PTS ~ X2PA + X3PA + FTA + AST + ORB + DRB +
-                 STL + BLK, data = NBA)
-summary(PointsReg2)
-
-#Removing insignificant variables
-#Removing DRB - defensive rebound 
-
-PointsReg3 = lm(PTS ~ X2PA + X3PA + FTA + AST + ORB + 
-                  STL + BLK, data = NBA)
-summary(PointsReg3)
-
-#Removing insignificant variables
-#Removing DRB - Blocks 
-
-PointsReg4 = lm(PTS ~ X2PA + X3PA + FTA + AST + ORB + 
-                  STL, data = NBA)
-summary(PointsReg4)
-
-#SSE, standing for sum of squared errors,
-SSE4 = sum(PointsReg4$residuals^2)
-SSE4
-#root mean squared error, RMSE-- 
-RMSE4 = sqrt(SSE4/ nrow(NBA))
-RMSE4
-mean(NBA$PTS)
-
-#Predicting points for 2012 - 2013 season with new Test data filr
+#we notice is that we've got very significant variables over here.
+#And an R squared of 0.9423, which is very high.
+#regression equation that we found.
+# W = 41 + 0.0326 * PTSDiff   ...We see that the number of wins, W, is equal to 41.That's coming from the coefficient estimate for the intercept.And that 0.0326 is coming from the coefficient estimate for PTSdiff. 
+#table that a team would want to win about at least 42 games
+# PTSDiff >= 42-41/0.0326
+#PTSDiff >= 30.67
+#we need to score at least 31 more points than we allow in order to win at least 42 games.
 
 
+#build an equation to predict points scored using some common basketball statistics.
+#So our dependent variable would now be PTS,and our independent variables would be some of the common basketball statistics that we have in our data set.
 
 
-NBA_Test = read.csv(file.choose())
- 
-#Points in 2012-2013 season
-PointsPredicitions = predict(PointsReg4, newdata = NBA_Test)
-PointsPredicitions
-summary(PointsPredicitions)
-SSE = sum((PointsPredicitions - NBA_Test$PTS)^2)
-SST = sum((mean(NBA$PTS) - NBA_Test$PTS)^2)
-R2 = 1- SSE/SST
-
-RMSE = sqrt(SSE/nrow(NBA_Test))
-RMSE
+PTSReg = lm(PTS ~ X2PA + X3PA + FTA + AST + ORB +DRB + TOV + STL + BLK, data = NBA )
+summary(PTSReg)
+#can see that some of our variables are indeed very,very, significant.Others are less significant.
+#R-squared value, 0.8992,so it shows that there really is a linear relationship
 
 
+#compute the residuals here
+PTSReg$residuals
+#use this to compute the sum of squared errors.
+SSE = sum(PTSReg$residuals^2)
+SSE    # Answer : 28394314
+#SSE numberis not really a very interpretable quantity.we can also calculate RMSE
+RMSE = sqrt(SSE/nrow(NBA))
+RMSE    #184.4049 -- On average we make error of 184.4049
+#Average number of points in season 
+mean(NBA$PTS)   # ANswer 8370.24
+
+#not all the variables were significant in linear regression.Let's see if we can remove some of the insignificant variables
+PTSReg2 = lm(PTS ~ X2PA + X3PA + FTA + AST + ORB + STL, data = NBA )
+summary(PTSReg2)
+# we remove insignificant untill there is no changes to R2 or less changes
+#calculating SSE and RMSE 
+
+SSE2 = sum(PTSReg2$residuals ^2)
+SSE2     # Answer 28421465
+RMSE2 = sqrt (SSE2/nrow(NBA))
+RMSE      # Answer 184.493  
 
 
+#we'll try to make predictions for the 2012-2013 season.
+NBATest = read.csv(file.choose())
+# predict using our model
+PointsPredictions = predict(PTSReg2 , newdata = NBATest) 
+PointsPredictions
+#The R-squared value we had before from our model,the 0.8991
+#But  to get a measure of the predictions goodness of fit,we need to calculate the out of sample R-squared.
+SSE3 = sum((PointsPredictions - NBATest$PTS)^2)
+SSE  #Answer  28421465
 
+SST = sum((mean(NBA$PTS)- NBATest$PTS)^2)
+SST #Answer 5765192
 
+R2 = 1 -SSE3/SST
+R2    #Answer 0.8127142
 
-
+RMSE3 = sqrt(SSE3/nrow(NBATest))
+RMSE3    #Answer 196.3723
